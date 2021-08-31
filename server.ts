@@ -27,8 +27,14 @@ const client = new Client(dbConfig);
 client.connect();
 
 app.get("/", async (req, res) => {
-  const dbres = await client.query('select * from categories');
-  res.json(dbres.rows);
+
+  res.json({
+    message:
+      "This server is working",
+  })
+
+  // const dbres = await client.query('select * from categories');
+  // res.json(dbres.rows);
 });
 
 
