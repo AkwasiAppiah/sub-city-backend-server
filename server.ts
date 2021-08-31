@@ -44,7 +44,11 @@ app.get("/event-info/:event_id", async (req, res) => {
       "select * from events WHERE event_id = $1",
       [event_id]
     );
-    res.json(dbres.rows);
+    if(dbres.rows.length === 1){
+    res.json(dbres.rows);}
+    else{
+      res.status(404)
+    }
   } catch (err) {
     console.log(err.message);
   }
