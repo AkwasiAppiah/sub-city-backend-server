@@ -50,6 +50,28 @@ app.get("/event-info/:event_id", async (req, res) => {
   }
 });
 
+app.post("/event-info/:event_id", async (req, res) => {
+  try {
+    const { event_id } = req.params;
+    const attendee_name = req.body.attendee_name;
+    const paid = req.body.paid
+    
+    const dbpost = await client.query(
+      "insert into event_info (attendee_name, paid, event_id) values($1, $2,$3)",
+      [attendee_name,paid,event_id]
+    );
+
+    const dbres = await client.query(
+      "select attendee_name from event_info WHERE event_id = $1",
+      [event_id]
+    );
+    res.json(dbres.rows);
+    
+  } catch (err) {
+    console.log(err.message);
+  }
+});
+
 // app.get("/event test", async(req,res) => {
 //   const dbres = await client.query('select * from event_info');
 //   res.json(dbres.rows);
