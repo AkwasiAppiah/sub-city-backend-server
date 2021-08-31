@@ -41,7 +41,7 @@ app.get("/event-info/:event_id", async (req, res) => {
   try {
     const { event_id } = req.params;
     const dbres = await client.query(
-      "select * from event_info WHERE event_id = $1",
+      "select * from events WHERE event_id = $1",
       [event_id]
     );
     res.json(dbres.rows);
