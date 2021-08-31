@@ -47,7 +47,7 @@ app.get("/event-info/:event_id", async (req, res) => {
     if(dbres.rows.length === 1){
     res.json(dbres.rows);}
     else{
-      res.status(404)
+      res.status(404).send("failed")
     }
   } catch (err) {
     console.log(err.message);
