@@ -66,6 +66,30 @@ app.post("/event-info/:event_id", async (req, res) => {
       [event_id]
     );
     res.json(dbres.rows);
+
+  } catch (err) {
+    console.log(err.message);
+  }
+});
+
+app.post("/events", async (req, res) => {
+  try {
+    const organiserName = req.body.organiserName;
+    const date_of_event = req.body.eventDate;
+    const description = req.body.description;
+    const total_cost = req.body.totalCost;
+    const num_of_attendees = req.body.attendees
+
+    
+    const dbpost = await client.query(
+      "insert into events (organiser_name, date_of_event, description, total_cost, num_of_attendees) values($1, $2,$3, $4, $5)",
+      [organiserName, date_of_event, description, total_cost, num_of_attendees ]
+    );
+
+    const dbres = await client.query(
+      "select * from events",
+    );
+    res.json(dbres.rows);
     
   } catch (err) {
     console.log(err.message);
