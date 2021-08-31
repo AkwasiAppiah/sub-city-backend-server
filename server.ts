@@ -36,7 +36,7 @@ app.get("/events", async (req, res) => {
 app.get("/event-info/:event_id", async(req,res) => {
   
   const { event_id } = req.params;
-  const dbres = await client.query('select * from event_info WHERE event_id = $1', [event_id]);
+  const dbres = await client.query('select attendee_name from event_info WHERE event_id = $1', [event_id]);
   res.json(dbres.rows);
 })
 
