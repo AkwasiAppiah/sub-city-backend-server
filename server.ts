@@ -28,6 +28,8 @@ app.use(cors()); //add CORS support to each following route handler
 const client = new Client(dbConfig);
 client.connect();
 
+//Event 
+
 app.get("/events", async (req, res) => {
   try {
     const dbres = await client.query("select * from events");
@@ -36,6 +38,40 @@ app.get("/events", async (req, res) => {
     console.log(err.message);
   }
 });
+
+
+app.post("/events", async (req, res) => {
+  try {
+    const organiserName = req.body.organiserName;
+    const date_of_event = req.body.eventDate;
+    const description = req.body.description;
+    const total_cost = req.body.totalCost;
+    const num_of_attendees = req.body.attendees
+
+    
+    const dbpost = await client.query(
+      "insert into events (organiser_name, date_of_event, description, total_cost, num_of_attendees) values($1, $2,$3, $4, $5)",
+      [organiserName, date_of_event, description, total_cost, num_of_attendees ]
+    );
+
+    const dbres = await client.query(
+      "select * from events",
+    );
+
+    const uniqueEventId = await client.query(
+      "select * from events WHERE organiser_name = $1 AND date_of_event = $2 AND description = $3 AND total_cost = $4 AND num_of_attendees = $5", 
+      [organiserName, date_of_event, description, total_cost, num_of_attendees ]);
+
+    const IdNumber = uniqueEventId.rows[0].event_id
+
+    res.status(200).send(`event-info/${IdNumber.toString()}`)
+    
+  } catch (err) {
+    console.log(err.message);
+  }
+});
+
+//Event Info
 
 app.get("/event-info/:event_id", async (req, res) => {
   try {
@@ -75,42 +111,6 @@ app.post("/event-info/:event_id", async (req, res) => {
     console.log(err.message);
   }
 });
-
-app.post("/events", async (req, res) => {
-  try {
-    const organiserName = req.body.organiserName;
-    const date_of_event = req.body.eventDate;
-    const description = req.body.description;
-    const total_cost = req.body.totalCost;
-    const num_of_attendees = req.body.attendees
-
-    
-    const dbpost = await client.query(
-      "insert into events (organiser_name, date_of_event, description, total_cost, num_of_attendees) values($1, $2,$3, $4, $5)",
-      [organiserName, date_of_event, description, total_cost, num_of_attendees ]
-    );
-
-    const dbres = await client.query(
-      "select * from events",
-    );
-
-    const uniqueEventId = await client.query(
-      "select * from events WHERE organiser_name = $1 AND date_of_event = $2 AND description = $3 AND total_cost = $4 AND num_of_attendees = $5", 
-      [organiserName, date_of_event, description, total_cost, num_of_attendees ]);
-
-    const IdNumber = uniqueEventId.rows[0].event_id
-
-    res.status(200).send(`event-info/${IdNumber.toString()}`)
-    
-  } catch (err) {
-    console.log(err.message);
-  }
-});
-
-// app.get("/event test", async(req,res) => {
-//   const dbres = await client.query('select * from event_info');
-//   res.json(dbres.rows);
-// })
 
 //Start the server on the given port
 const port = process.env.PORT;
