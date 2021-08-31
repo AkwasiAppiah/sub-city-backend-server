@@ -64,7 +64,7 @@ app.post("/events", async (req, res) => {
 
     const IdNumber = uniqueEventId.rows[0].event_id
 
-    res.status(200).send(`event-info/${IdNumber.toString()}`)
+    res.status(200).send(`/event-info/${IdNumber.toString()}`)
     
   } catch (err) {
     console.log(err.message);
