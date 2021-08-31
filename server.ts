@@ -26,16 +26,18 @@ app.use(cors()) //add CORS support to each following route handler
 const client = new Client(dbConfig);
 client.connect();
 
-app.get("/", async (req, res) => {
-
-  // res.json({
-  //   message:
-  //     "This server is working",
-  // })
-
+app.get("/events", async (req, res) => {
+  
   const dbres = await client.query('select * from events');
   res.json(dbres.rows);
 });
+
+app.get("/event-info/:id", async(req,res) => {
+  
+  const { event_id } = req.params;
+  const dbres = await client.query('select * from event_info WHERE event_id = $1', [event_id]);
+  res.json(dbres.rows);
+})
 
 
 //Start the server on the given port
