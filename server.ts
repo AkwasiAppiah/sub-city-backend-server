@@ -89,7 +89,14 @@ app.post("/events", async (req, res) => {
     const dbres = await client.query(
       "select * from events",
     );
-    res.json(dbres.rows);
+
+    const uniqueEventId = await client.query(
+      "select * from events WHERE organiser_name = $1 AND date_of_event = $2 AND description = $3 AND total_cost = $4 AND num_of_attendees = $5", 
+      [organiserName, date_of_event, description, total_cost, num_of_attendees ]);
+
+    const IdNumber = uniqueEventId.rows[0].event_id
+
+    res.status(200).send(`/event-info/${IdNumber.toString()}`)
     
   } catch (err) {
     console.log(err.message);
