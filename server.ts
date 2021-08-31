@@ -33,7 +33,7 @@ app.get("/", async (req, res) => {
   //     "This server is working",
   // })
 
-  const dbres = await client.query('select * from categories');
+  const dbres = await client.query('select * from events');
   res.json(dbres.rows);
 });
 
