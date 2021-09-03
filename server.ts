@@ -28,8 +28,12 @@ app.use(cors()); //add CORS support to each following route handler
 const client = new Client(dbConfig);
 client.connect();
 
+const stripe = require('stripe')('sk_test_t6wigvrtkDil4Yn4ru6PSLA700xV7JkjvX')
+
 //Event 
 
+
+// Return a list of all events from events table in database
 app.get("/events", async (req, res) => {
   try {
     const dbres = await client.query("select * from events");
@@ -40,6 +44,7 @@ app.get("/events", async (req, res) => {
 });
 
 
+// Allow frontend to add and insert data into table. 
 app.post("/events", async (req, res) => {
   try {
     const organiserName = req.body.organiserName;
@@ -54,9 +59,9 @@ app.post("/events", async (req, res) => {
       [organiserName, date_of_event, description, total_cost, num_of_attendees ]
     );
 
-    const dbres = await client.query(
-      "select * from events",
-    );
+    // const dbres = await client.query(
+    //   "select * from events",
+    // );
 
     const uniqueEventId = await client.query(
       "select * from events WHERE organiser_name = $1 AND date_of_event = $2 AND description = $3 AND total_cost = $4 AND num_of_attendees = $5", 
@@ -73,6 +78,9 @@ app.post("/events", async (req, res) => {
 
 //Event Info
 
+
+
+// Allow frontend to fetch data about specific event
 app.get("/event-info/:event_id", async (req, res) => {
   try {
     const { event_id } = req.params;
@@ -90,27 +98,71 @@ app.get("/event-info/:event_id", async (req, res) => {
   }
 });
 
-app.post("/event-info/:event_id", async (req, res) => {
-  try {
-    const { event_id } = req.params;
-    const attendee_name = req.body.attendee_name;
-    const paid = req.body.paid
+// // Allow front event 
+// app.post("/event-info/:event_id", async (req, res) => {
+//   try {
+//     const { event_id } = req.params;
+//     const attendee_name = req.body.attendee_name;
+//     const paid = req.body.paid
     
-    const dbpost = await client.query(
-      "insert into event_info (attendee_name, paid, event_id) values($1, $2,$3)",
-      [attendee_name,paid,event_id]
-    );
+//     const dbpost = await client.query(
+//       "insert into event_info (attendee_name, paid, event_id) values($1, $2,$3)",
+//       [attendee_name,paid,event_id]
+//     );
 
-    const dbres = await client.query(
-      "select attendee_name from event_info WHERE event_id = $1",
-      [event_id]
-    );
-    res.json(dbres.rows);
+//     const dbres = await client.query(
+//       "select attendee_name from event_info WHERE event_id = $1",
+//       [event_id]
+//     );
+//     res.json(dbres.rows);
 
-  } catch (err) {
-    console.log(err.message);
+//   } catch (err) {
+//     console.log(err.message);
+//   }
+// });
+
+// Allow front end to allow attendee to accept assignment and pay.
+app.post("/attendee/buy/:event_id", async (req,res) => {
+
+  try{  
+
+    //get event Id from params
+    const {event_id} = req.params;
+
+    // get attendee name from params
+    const attendee_name = req.body.attendee_name;
+
+    // get cost from
+    const cost = req.body.cost
+    
+    // make payment to stripe
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: 'BasketQuantity',
+            },
+            unit_amount: cost,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: 'https://buyplayersdirect.netlify.app',
+      cancel_url: 'https://en.wikipedia.org/wiki/HTTP_404',
+    });
+  
+
+
+
+  }catch(err){
+    console.log(err.message)
   }
-});
+
+})
 
 //Start the server on the given port
 const port = process.env.PORT;
