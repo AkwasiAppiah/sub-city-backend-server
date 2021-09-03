@@ -52,11 +52,12 @@ app.post("/events", async (req, res) => {
     const description = req.body.description;
     const total_cost = req.body.totalCost;
     const num_of_attendees = req.body.attendees
+    const time_of_event = req.body.eventTime
 
     
     const dbpost = await client.query(
-      "insert into events (organiser_name, date_of_event, description, total_cost, num_of_attendees) values($1, $2,$3, $4, $5)",
-      [organiserName, date_of_event, description, total_cost, num_of_attendees ]
+      "insert into events (organiser_name, date_of_event, description, total_cost, num_of_attendees) values($1, $2,$3, $4, $5, $6)",
+      [organiserName, date_of_event, description, total_cost, num_of_attendees, time_of_event ]
     );
 
     // const dbres = await client.query(
@@ -64,8 +65,8 @@ app.post("/events", async (req, res) => {
     // );
 
     const uniqueEventId = await client.query(
-      "select * from events WHERE organiser_name = $1 AND date_of_event = $2 AND description = $3 AND total_cost = $4 AND num_of_attendees = $5", 
-      [organiserName, date_of_event, description, total_cost, num_of_attendees ]);
+      "select * from events WHERE organiser_name = $1 AND date_of_event = $2 AND description = $3 AND total_cost = $4 AND num_of_attendees = $5 AND time_of_event = $6", 
+      [organiserName, date_of_event, description, total_cost, num_of_attendees, time_of_event]);
 
     const IdNumber = uniqueEventId.rows[0].event_id
 
@@ -143,7 +144,7 @@ app.post("/attendee/buy/:event_id", async (req,res) => {
           price_data: {
             currency: 'gbp',
             product_data: {
-              name: 'BasketQuantity',
+              name: 'Sub Amount',
             },
             unit_amount: cost,
           },
