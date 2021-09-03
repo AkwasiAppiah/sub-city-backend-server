@@ -56,8 +56,8 @@ app.post("/events", async (req, res) => {
 
     
     const dbpost = await client.query(
-      "insert into events (organiser_name, date_of_event, description, total_cost, num_of_attendees) values($1, $2,$3, $4, $5, $6)",
-      [organiserName, date_of_event, description, total_cost, num_of_attendees, time_of_event ]
+      "insert into events (organiser_name, date_of_event, description, total_cost, num_of_attendees, time_of_event) values($1, $2,$3, $4, $5, $6)",
+      [organiserName, date_of_event, description, total_cost, num_of_attendees, time_of_event]
     );
 
     // const dbres = await client.query(
