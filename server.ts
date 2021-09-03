@@ -28,10 +28,9 @@ app.use(cors()); //add CORS support to each following route handler
 const client = new Client(dbConfig);
 client.connect();
 
-const stripe = require('stripe')('sk_test_t6wigvrtkDil4Yn4ru6PSLA700xV7JkjvX')
+const stripe = require("stripe")("sk_test_t6wigvrtkDil4Yn4ru6PSLA700xV7JkjvX");
 
-//Event 
-
+//Event
 
 // Return a list of all events from events table in database
 app.get("/events", async (req, res) => {
@@ -43,21 +42,26 @@ app.get("/events", async (req, res) => {
   }
 });
 
-
-// Allow frontend to add and insert data into table. 
+// Allow frontend to add and insert data into table.
 app.post("/events", async (req, res) => {
   try {
     const organiserName = req.body.organiserName;
     const date_of_event = req.body.eventDate;
     const description = req.body.description;
     const total_cost = req.body.totalCost;
-    const num_of_attendees = req.body.attendees
-    const time_of_event = req.body.eventTime
+    const num_of_attendees = req.body.attendees;
+    const time_of_event = req.body.eventTime;
 
-    
     const dbpost = await client.query(
       "insert into events (organiser_name, date_of_event, description, total_cost, num_of_attendees, time_of_event) values($1, $2,$3, $4, $5, $6)",
-      [organiserName, date_of_event, description, total_cost, num_of_attendees, time_of_event]
+      [
+        organiserName,
+        date_of_event,
+        description,
+        total_cost,
+        num_of_attendees,
+        time_of_event,
+      ]
     );
 
     // const dbres = await client.query(
@@ -65,21 +69,26 @@ app.post("/events", async (req, res) => {
     // );
 
     const uniqueEventId = await client.query(
-      "select * from events WHERE organiser_name = $1 AND date_of_event = $2 AND description = $3 AND total_cost = $4 AND num_of_attendees = $5 AND time_of_event = $6", 
-      [organiserName, date_of_event, description, total_cost, num_of_attendees, time_of_event]);
+      "select * from events WHERE organiser_name = $1 AND date_of_event = $2 AND description = $3 AND total_cost = $4 AND num_of_attendees = $5 AND time_of_event = $6",
+      [
+        organiserName,
+        date_of_event,
+        description,
+        total_cost,
+        num_of_attendees,
+        time_of_event,
+      ]
+    );
 
-    const IdNumber = uniqueEventId.rows[0].event_id
+    const IdNumber = uniqueEventId.rows[0].event_id;
 
-    res.status(200).send(`${IdNumber.toString()}`)
-    
+    res.status(200).send(`${IdNumber.toString()}`);
   } catch (err) {
     console.log(err.message);
   }
 });
 
 //Event Info
-
-
 
 // Allow frontend to fetch data about specific event
 app.get("/event-info/:event_id", async (req, res) => {
@@ -89,23 +98,23 @@ app.get("/event-info/:event_id", async (req, res) => {
       "select * from events WHERE event_id = $1",
       [event_id]
     );
-    if(dbres.rows.length === 1){
-    res.json(dbres.rows);}
-    else{
-      res.status(404).send("failed")
+    if (dbres.rows.length === 1) {
+      res.json(dbres.rows);
+    } else {
+      res.status(404).send("failed");
     }
   } catch (err) {
     console.log(err.message);
   }
 });
 
-// // Allow front event 
+// // Allow front event
 // app.post("/event-info/:event_id", async (req, res) => {
 //   try {
 //     const { event_id } = req.params;
 //     const attendee_name = req.body.attendee_name;
 //     const paid = req.body.paid
-    
+
 //     const dbpost = await client.query(
 //       "insert into event_info (attendee_name, paid, event_id) values($1, $2,$3)",
 //       [attendee_name,paid,event_id]
@@ -123,47 +132,52 @@ app.get("/event-info/:event_id", async (req, res) => {
 // });
 
 // Allow front end to allow attendee to accept assignment and pay.
-app.post("/attendee/buy/:event_id", async (req,res) => {
-
-  try{  
-
+app.post("/attendee/buy/:event_id", async (req, res) => {
+  try {
     //get event Id from params
-    const {event_id} = req.params;
+    const { event_id } = req.params;
 
     // get attendee name from params
     const attendee_name = req.body.attendee_name;
 
     // get cost from
-    const cost = req.body.cost
-    
+    const cost = req.body.cost;
+
     // make payment to stripe
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
-            currency: 'gbp',
+            currency: "gbp",
             product_data: {
-              name: 'Sub Amount',
+              name: "Sub Amount",
             },
             unit_amount: cost,
           },
           quantity: 1,
         },
       ],
-      mode: 'payment',
-      success_url: 'https://buyplayersdirect.netlify.app',
-      cancel_url: 'https://en.wikipedia.org/wiki/HTTP_404',
+      mode: "payment",
+      success_url:
+        "http://vibrant-neumann-c81a96.netlify.app/order/success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "https://en.wikipedia.org/wiki/HTTP_404",
     });
-  
 
-
-
-  }catch(err){
-    console.log(err.message)
+    res.status(200).send(session.url);
+  } catch (err) {
+    console.log(err.message);
   }
+});
 
-})
+app.get("/order/success", async (req, res) => {
+  const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+  const customer = await stripe.customers.retrieve(session.customer);
+
+  res.send(
+    `<html><body><h1>Thanks for your order, ${customer.name}!</h1></body></html>`
+  );
+});
 
 //Start the server on the given port
 const port = process.env.PORT;
