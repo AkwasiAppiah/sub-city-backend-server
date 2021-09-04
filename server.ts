@@ -141,7 +141,7 @@ app.post("/attendee/buy/:event_id", async (req, res) => {
     const attendee_name = req.body.attendee_name;
 
     // get cost from
-    const cost = req.body.cost;
+    const costPerPerson = req.body.costInPennies;
 
     // make payment to stripe
     const session = await stripe.checkout.sessions.create({
@@ -153,7 +153,7 @@ app.post("/attendee/buy/:event_id", async (req, res) => {
             product_data: {
               name: "Sub Amount",
             },
-            unit_amount: cost,
+            unit_amount: costPerPerson,
           },
           quantity: 1,
         },
