@@ -160,7 +160,7 @@ app.post("/attendee/buy/:event_id", async (req, res) => {
       ],
       mode: "payment",
       success_url:
-        "http://vibrant-neumann-c81a96.netlify.app/order/success?session_id={CHECKOUT_SESSION_ID}",
+        "https://sub-city.netlify.app/order/success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://en.wikipedia.org/wiki/HTTP_404",
     });
 
