@@ -160,7 +160,7 @@ app.post("/attendee/buy/:event_id", async (req, res) => {
       ],
       mode: "payment",
       success_url:
-        "http://localhost:4000/order/success?session_id={CHECKOUT_SESSION_ID}",
+        "https://sub-city.netlify.app/order/success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://en.wikipedia.org/wiki/HTTP_404",
     });
 
