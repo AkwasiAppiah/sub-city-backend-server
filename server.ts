@@ -151,7 +151,7 @@ app.post("/attendee/buy/:event_id", async (req, res) => {
           price_data: {
             currency: "gbp",
             product_data: {
-              name: "Sub Amount",
+              name: `${attendee_name}Sub Amount`,
             },
             unit_amount: costPerPerson,
           },
